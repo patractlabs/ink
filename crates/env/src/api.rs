@@ -34,6 +34,10 @@ use crate::{
         HashOutput,
     },
     topics::Topics,
+    zk_snarks::{
+        CurvePoint,
+        CurvePointOutput,
+    },
     Environment,
     Result,
 };
@@ -536,6 +540,29 @@ where
 {
     <EnvInstance as OnInstance>::on_instance(|instance| {
         instance.hash_bytes::<H>(input, output)
+    })
+}
+
+/// Conducts the curve point of the given input and stores the result in `output`.
+pub fn inflect_add<C>(g1: &[u8], g2: &[u8], output: &mut <C as CurvePointOutput>::Type)
+where
+    C: CurvePoint,
+{
+    <EnvInstance as OnInstance>::on_instance(|instance| {
+        instance.inflect_add::<C>(g1, g2, output)
+    })
+}
+
+/// Conducts the curve point of the given input and stores the result in `output`.
+pub fn inflect_mul<C>(
+    input: &[u8],
+    scalar: u64,
+    output: &mut <C as CurvePointOutput>::Type,
+) where
+    C: CurvePoint,
+{
+    <EnvInstance as OnInstance>::on_instance(|instance| {
+        instance.inflect_mul::<C>(input, scalar, output)
     })
 }
 

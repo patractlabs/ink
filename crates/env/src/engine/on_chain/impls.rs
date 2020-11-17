@@ -36,6 +36,11 @@ use crate::{
         Topics,
         TopicsBuilderBackend,
     },
+    zk_snarks::{
+        AltBn128,
+        CurvePoint,
+        CurvePointOutput,
+    },
     Clear,
     EnvBackend,
     Environment,
@@ -91,6 +96,32 @@ impl CryptoHash for Keccak256 {
         );
         let output: &mut OutputType = arrayref::array_mut_ref!(output, 0, 32);
         ext::hash_keccak_256(input, output);
+    }
+}
+
+impl CurvePoint for AltBn128 {
+    fn inflect_add(g1: &[u8], g2: &[u8], output: &mut <Self as CurvePointOutput>::Type) {
+        type OutputType = [u8; 64];
+        static_assertions::assert_type_eq_all!(
+            <AltBn128 as CurvePointOutput>::Type,
+            OutputType,
+        );
+        let output: &mut OutputType = arrayref::array_mut_ref!(output, 0, 64);
+        ext::curve_bn_256_add(g1, g2, output)
+    }
+
+    fn inflect_mul(
+        input: &[u8],
+        scalar: u64,
+        output: &mut <Self as CurvePointOutput>::Type,
+    ) {
+        type OutputType = [u8; 64];
+        static_assertions::assert_type_eq_all!(
+            <AltBn128 as CurvePointOutput>::Type,
+            OutputType,
+        );
+        let output: &mut OutputType = arrayref::array_mut_ref!(output, 0, 64);
+        ext::curve_bn_256_mul(input, scalar, output)
     }
 }
 
@@ -260,6 +291,28 @@ impl EnvBackend for EnvInstance {
         H: CryptoHash,
     {
         <H as CryptoHash>::hash(input, output)
+    }
+
+    fn inflect_add<C>(
+        &mut self,
+        g1: &[u8],
+        g2: &[u8],
+        output: &mut <C as CurvePointOutput>::Type,
+    ) where
+        C: CurvePoint,
+    {
+        <C as CurvePoint>::inflect_add(g1, g2, output)
+    }
+
+    fn inflect_mul<C>(
+        &mut self,
+        input: &[u8],
+        scalar: u64,
+        output: &mut <C as CurvePointOutput>::Type,
+    ) where
+        C: CurvePoint,
+    {
+        <C as CurvePoint>::inflect_mul(input, scalar, output)
     }
 
     fn hash_encoded<H, T>(&mut self, input: &T, output: &mut <H as HashOutput>::Type)

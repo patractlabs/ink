@@ -23,6 +23,11 @@ use ink_env::{
         CryptoHash,
         HashOutput,
     },
+    zk_snarks::{
+        CurvePoint,
+        CurvePointOutput,
+        Default as ZkDefault,
+    },
     Environment,
     Result,
 };
@@ -305,7 +310,21 @@ where
         output
     }
 
-    /// Computes the hash of the given SCALE encoded value using the cryptographic hash `H`.
+    /// Computes the point of the given bytes using the curve add `C`.
+    ///
+    /// # Note
+    ///
+    /// For more details visit: [`ink_env::inflect_add`]
+    pub fn inflect_add<C>(self, g1: &[u8], g2: &[u8]) -> <C as CurvePointOutput>::Type
+    where
+        C: CurvePoint,
+    {
+        let mut output = <C as CurvePointOutput>::Type::default();
+        ink_env::inflect_add::<C>(g1, g2, &mut output);
+        output
+    }
+
+    /// Computes the point of the given bytes using the curve mul `C`.
     ///
     /// # Note
     ///

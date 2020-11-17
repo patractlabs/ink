@@ -23,6 +23,10 @@ use crate::{
         HashOutput,
     },
     topics::Topics,
+    zk_snarks::{
+        CurvePoint,
+        CurvePointOutput,
+    },
     Environment,
     Result,
 };
@@ -121,6 +125,24 @@ pub trait EnvBackend {
     fn hash_bytes<H>(&mut self, input: &[u8], output: &mut <H as HashOutput>::Type)
     where
         H: CryptoHash;
+
+    /// Conducts the crypto hash of the given input and stores the result in `output`.
+    fn inflect_add<C>(
+        &mut self,
+        g1: &[u8],
+        g2: &[u8],
+        output: &mut <C as CurvePointOutput>::Type,
+    ) where
+        C: CurvePoint;
+
+    /// Conducts the crypto hash of the given input and stores the result in `output`.
+    fn inflect_mul<C>(
+        &mut self,
+        input: &[u8],
+        scalar: u64,
+        output: &mut <C as CurvePointOutput>::Type,
+    ) where
+        C: CurvePoint;
 
     /// Conducts the crypto hash of the given encoded input and stores the result in `output`.
     fn hash_encoded<H, T>(&mut self, input: &T, output: &mut <H as HashOutput>::Type)

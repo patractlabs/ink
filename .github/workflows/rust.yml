@@ -1,0 +1,38 @@
+name: Build && Tests
+
+on:
+  push:
+    branches: [ master, partract ]
+  pull_request:
+    branches: [ master, partract ]
+
+env:
+  CARGO_TERM_COLOR: always
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the source code
+        uses: actions/checkout@v1
+      - name: Set nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-2020-10-06
+          target: wasm32-unknown-unknown
+          override: true
+      - name: Cache substrate deps
+        uses: actions/cache@v1
+        env:
+          cache-name: substrate-cache
+        with:
+          path: ./target
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('./Cargo.lock') }}
+      - name: Build
+        run: cargo build --all --verbose
+      - name: Build ENV
+        run: |
+          cd crates/env
+          cargo build --no-default-features --target wasm32-unknown-unknown --verbose
+      - name: Run tests
+        run: cargo test --all --verbose --exclude ink_storage

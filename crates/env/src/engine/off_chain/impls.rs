@@ -32,6 +32,12 @@ use crate::{
         Sha2x256,
     },
     topics::Topics,
+    zk_snarks::{
+        AltBn128,
+        CurvePoint,
+        CurvePointOutput,
+        Default,
+    },
     EnvBackend,
     Environment,
     Error,
@@ -117,6 +123,24 @@ impl CryptoHash for Keccak256 {
     }
 }
 
+impl CurvePoint for AltBn128 {
+    fn inflect_add(
+        _g1: &[u8],
+        _g2: &[u8],
+        output: &mut <Self as CurvePointOutput>::Type,
+    ) {
+        *output = <Self as CurvePointOutput>::Type::default();
+    }
+
+    fn inflect_mul(
+        _input: &[u8],
+        _scalar: u64,
+        output: &mut <Self as CurvePointOutput>::Type,
+    ) {
+        *output = <Self as CurvePointOutput>::Type::default();
+    }
+}
+
 impl EnvBackend for EnvInstance {
     fn set_contract_storage<V>(&mut self, key: &Key, value: &V)
     where
@@ -179,6 +203,28 @@ impl EnvBackend for EnvInstance {
         H: CryptoHash,
     {
         <H as CryptoHash>::hash(input, output)
+    }
+
+    fn inflect_add<C>(
+        &mut self,
+        g1: &[u8],
+        g2: &[u8],
+        output: &mut <C as CurvePointOutput>::Type,
+    ) where
+        C: CurvePoint,
+    {
+        <C as CurvePoint>::inflect_add(g1, g2, output)
+    }
+
+    fn inflect_mul<C>(
+        &mut self,
+        input: &[u8],
+        scalar: u64,
+        output: &mut <C as CurvePointOutput>::Type,
+    ) where
+        C: CurvePoint,
+    {
+        <C as CurvePoint>::inflect_mul(input, scalar, output)
     }
 
     fn hash_encoded<H, T>(&mut self, input: &T, output: &mut <H as HashOutput>::Type)
