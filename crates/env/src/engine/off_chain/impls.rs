@@ -32,11 +32,11 @@ use crate::{
         Sha2x256,
     },
     topics::Topics,
-    zk_snarks::{
+    zk::{
         AltBn128,
+        Bls12381,
         CurvePoint,
         CurvePointOutput,
-        Default,
     },
     EnvBackend,
     Environment,
@@ -124,20 +124,30 @@ impl CryptoHash for Keccak256 {
 }
 
 impl CurvePoint for AltBn128 {
-    fn inflect_add(
-        _g1: &[u8],
-        _g2: &[u8],
-        output: &mut <Self as CurvePointOutput>::Type,
-    ) {
-        *output = <Self as CurvePointOutput>::Type::default();
+    fn inflect_add(_input: &[u8], output: &mut <Self as CurvePointOutput>::Type) {
+        *output = <Self as CurvePointOutput>::default();
     }
 
-    fn inflect_mul(
-        _input: &[u8],
-        _scalar: u64,
-        output: &mut <Self as CurvePointOutput>::Type,
-    ) {
-        *output = <Self as CurvePointOutput>::Type::default();
+    fn inflect_mul(_input: &[u8], output: &mut <Self as CurvePointOutput>::Type) {
+        *output = <Self as CurvePointOutput>::default();
+    }
+
+    fn inflect_pairing(_input: &[u8], output: &mut [u8; 1]) {
+        *output = [1]
+    }
+}
+
+impl CurvePoint for Bls12381 {
+    fn inflect_add(_input: &[u8], output: &mut <Self as CurvePointOutput>::Type) {
+        *output = <Self as CurvePointOutput>::default();
+    }
+
+    fn inflect_mul(_input: &[u8], output: &mut <Self as CurvePointOutput>::Type) {
+        *output = <Self as CurvePointOutput>::default();
+    }
+
+    fn inflect_pairing(_input: &[u8], output: &mut [u8; 1]) {
+        *output = [1]
     }
 }
 
@@ -205,28 +215,6 @@ impl EnvBackend for EnvInstance {
         <H as CryptoHash>::hash(input, output)
     }
 
-    fn inflect_add<C>(
-        &mut self,
-        g1: &[u8],
-        g2: &[u8],
-        output: &mut <C as CurvePointOutput>::Type,
-    ) where
-        C: CurvePoint,
-    {
-        <C as CurvePoint>::inflect_add(g1, g2, output)
-    }
-
-    fn inflect_mul<C>(
-        &mut self,
-        input: &[u8],
-        scalar: u64,
-        output: &mut <C as CurvePointOutput>::Type,
-    ) where
-        C: CurvePoint,
-    {
-        <C as CurvePoint>::inflect_mul(input, scalar, output)
-    }
-
     fn hash_encoded<H, T>(&mut self, input: &T, output: &mut <H as HashOutput>::Type)
     where
         H: CryptoHash,
@@ -234,6 +222,27 @@ impl EnvBackend for EnvInstance {
     {
         let encoded = input.encode();
         self.hash_bytes::<H>(&encoded[..], output)
+    }
+
+    fn inflect_add<C>(&mut self, input: &[u8], output: &mut <C as CurvePointOutput>::Type)
+    where
+        C: CurvePoint,
+    {
+        <C as CurvePoint>::inflect_add(input, output)
+    }
+
+    fn inflect_mul<C>(&mut self, input: &[u8], output: &mut <C as CurvePointOutput>::Type)
+    where
+        C: CurvePoint,
+    {
+        <C as CurvePoint>::inflect_mul(input, output)
+    }
+
+    fn inflect_pairing<C>(&mut self, input: &[u8], output: &mut [u8; 1])
+    where
+        C: CurvePoint,
+    {
+        <C as CurvePoint>::inflect_pairing(input, output)
     }
 
     #[cfg(feature = "ink-unstable-chain-extensions")]

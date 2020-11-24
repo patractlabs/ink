@@ -34,7 +34,7 @@ use crate::{
         HashOutput,
     },
     topics::Topics,
-    zk_snarks::{
+    zk::{
         CurvePoint,
         CurvePointOutput,
     },
@@ -543,29 +543,6 @@ where
     })
 }
 
-/// Conducts the curve point of the given input and stores the result in `output`.
-pub fn inflect_add<C>(g1: &[u8], g2: &[u8], output: &mut <C as CurvePointOutput>::Type)
-where
-    C: CurvePoint,
-{
-    <EnvInstance as OnInstance>::on_instance(|instance| {
-        instance.inflect_add::<C>(g1, g2, output)
-    })
-}
-
-/// Conducts the curve point of the given input and stores the result in `output`.
-pub fn inflect_mul<C>(
-    input: &[u8],
-    scalar: u64,
-    output: &mut <C as CurvePointOutput>::Type,
-) where
-    C: CurvePoint,
-{
-    <EnvInstance as OnInstance>::on_instance(|instance| {
-        instance.inflect_mul::<C>(input, scalar, output)
-    })
-}
-
 /// Conducts the crypto hash of the given encoded input and stores the result in `output`.
 ///
 /// # Example
@@ -588,5 +565,35 @@ where
 {
     <EnvInstance as OnInstance>::on_instance(|instance| {
         instance.hash_encoded::<H, T>(input, output)
+    })
+}
+
+/// Conducts the curve point add of the given input and stores the result in `output`.
+pub fn inflect_add<C>(input: &[u8], output: &mut <C as CurvePointOutput>::Type)
+where
+    C: CurvePoint,
+{
+    <EnvInstance as OnInstance>::on_instance(|instance| {
+        instance.inflect_add::<C>(input, output)
+    })
+}
+
+/// Conducts the curve point curve of the given input and stores the result in `output`.
+pub fn inflect_mul<C>(input: &[u8], output: &mut <C as CurvePointOutput>::Type)
+where
+    C: CurvePoint,
+{
+    <EnvInstance as OnInstance>::on_instance(|instance| {
+        instance.inflect_mul::<C>(input, output)
+    })
+}
+
+/// Conducts the curve point pairing of the given input and stores the result in `output`.
+pub fn inflect_pairing<C>(input: &[u8], output: &mut [u8; 1])
+where
+    C: CurvePoint,
+{
+    <EnvInstance as OnInstance>::on_instance(|instance| {
+        instance.inflect_pairing::<C>(input, output)
     })
 }

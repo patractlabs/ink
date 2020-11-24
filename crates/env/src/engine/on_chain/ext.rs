@@ -328,17 +328,34 @@ mod sys {
             input_len: u32,
             output_ptr: Ptr32Mut<[u8]>,
         );
-        pub fn seal_curve_bn_256_add(
-            g1_ptr: Ptr32<[u8]>,
-            g1_len: u32,
-            g2_ptr: Ptr32<[u8]>,
-            g2_len: u32,
-            output_ptr: Ptr32Mut<[u8]>,
-        );
-        pub fn seal_curve_bn_256_mul(
+        pub fn seal_curve_altbn_128_add(
             input_ptr: Ptr32<[u8]>,
             input_len: u32,
-            scalar: u64,
+            output_ptr: Ptr32Mut<[u8]>,
+        );
+        pub fn seal_curve_altbn_128_mul(
+            input_ptr: Ptr32<[u8]>,
+            input_len: u32,
+            output_ptr: Ptr32Mut<[u8]>,
+        );
+        pub fn seal_curve_altbn_128_pairing(
+            input_ptr: Ptr32<[u8]>,
+            input_len: u32,
+            output_ptr: Ptr32Mut<[u8]>,
+        );
+        pub fn seal_curve_bls12_381_add(
+            input_ptr: Ptr32<[u8]>,
+            input_len: u32,
+            output_ptr: Ptr32Mut<[u8]>,
+        );
+        pub fn seal_curve_bls12_381_mul(
+            input_ptr: Ptr32<[u8]>,
+            input_len: u32,
+            output_ptr: Ptr32Mut<[u8]>,
+        );
+        pub fn seal_curve_bls12_381_pairing(
+            input_ptr: Ptr32<[u8]>,
+            input_len: u32,
             output_ptr: Ptr32Mut<[u8]>,
         );
     }
@@ -632,33 +649,14 @@ impl_hash_fn!(keccak_256, 32);
 impl_hash_fn!(blake2_256, 32);
 impl_hash_fn!(blake2_128, 16);
 
-macro_rules! impl_curve_add_fn {
+macro_rules! impl_curve_fn {
     ( $name:ident, $bytes_result:literal ) => {
         paste::item! {
-            pub fn [<curve_ $name>](g1: &[u8], g2: &[u8], output: &mut [u8; $bytes_result]) {
-                unsafe {
-                    sys::[<seal_curve_ $name>](
-                        Ptr32::from_slice(g1),
-                        g1.len() as u32,
-                        Ptr32::from_slice(g2),
-                        g2.len() as u32,
-                        Ptr32Mut::from_slice(output),
-                    )
-                }
-            }
-        }
-    };
-}
-
-macro_rules! impl_curve_mul_fn {
-    ( $name:ident, $bytes_result:literal ) => {
-        paste::item! {
-            pub fn [<curve_ $name>](input: &[u8], scalar: u64, output: &mut [u8; $bytes_result]) {
+            pub fn [<curve_ $name>](input: &[u8], output: &mut [u8; $bytes_result]) {
                 unsafe {
                     sys::[<seal_curve_ $name>](
                         Ptr32::from_slice(input),
                         input.len() as u32,
-                        scalar,
                         Ptr32Mut::from_slice(output),
                     )
                 }
@@ -667,5 +665,9 @@ macro_rules! impl_curve_mul_fn {
     };
 }
 
-impl_curve_add_fn!(bn_256_add, 64);
-impl_curve_mul_fn!(bn_256_mul, 64);
+impl_curve_fn!(altbn_128_add, 64);
+impl_curve_fn!(altbn_128_mul, 64);
+impl_curve_fn!(altbn_128_pairing, 1);
+impl_curve_fn!(bls12_381_add, 96);
+impl_curve_fn!(bls12_381_mul, 96);
+impl_curve_fn!(bls12_381_pairing, 1);

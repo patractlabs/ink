@@ -23,10 +23,9 @@ use ink_env::{
         CryptoHash,
         HashOutput,
     },
-    zk_snarks::{
+    zk::{
         CurvePoint,
         CurvePointOutput,
-        Default as ZkDefault,
     },
     Environment,
     Result,
@@ -310,20 +309,6 @@ where
         output
     }
 
-    /// Computes the point of the given bytes using the curve add `C`.
-    ///
-    /// # Note
-    ///
-    /// For more details visit: [`ink_env::inflect_add`]
-    pub fn inflect_add<C>(self, g1: &[u8], g2: &[u8]) -> <C as CurvePointOutput>::Type
-    where
-        C: CurvePoint,
-    {
-        let mut output = <C as CurvePointOutput>::Type::default();
-        ink_env::inflect_add::<C>(g1, g2, &mut output);
-        output
-    }
-
     /// Computes the point of the given bytes using the curve mul `C`.
     ///
     /// # Note
@@ -337,5 +322,47 @@ where
         let mut output = <H as HashOutput>::Type::default();
         ink_env::hash_encoded::<H, V>(value, &mut output);
         output
+    }
+
+    /// Computes the point of the given bytes using the curve add `C`.
+    ///
+    /// # Note
+    ///
+    /// For more details visit: [`ink_env::inflect_add`]
+    pub fn inflect_add<C>(self, input: &[u8]) -> <C as CurvePointOutput>::Type
+    where
+        C: CurvePoint,
+    {
+        let mut output = <C as CurvePointOutput>::default();
+        ink_env::inflect_add::<C>(input, &mut output);
+        output
+    }
+
+    /// Computes the point of the given bytes using the curve add `C`.
+    ///
+    /// # Note
+    ///
+    /// For more details visit: [`ink_env::inflect_mul`]
+    pub fn inflect_mul<C>(self, input: &[u8]) -> <C as CurvePointOutput>::Type
+    where
+        C: CurvePoint,
+    {
+        let mut output = <C as CurvePointOutput>::default();
+        ink_env::inflect_mul::<C>(input, &mut output);
+        output
+    }
+
+    /// Computes if pairing of the given bytes using the curve add `C`.
+    ///
+    /// # Note
+    ///
+    /// For more details visit: [`ink_env::inflect_pairing`]
+    pub fn inflect_pairing<C>(self, input: &[u8]) -> bool
+    where
+        C: CurvePoint,
+    {
+        let mut res = [0; 1];
+        ink_env::inflect_pairing::<C>(input, &mut res);
+        res[0] == 0
     }
 }

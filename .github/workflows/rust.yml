@@ -2,9 +2,9 @@ name: Build && Tests
 
 on:
   push:
-    branches: [ master, partract ]
+    branches: [ megaclite ]
   pull_request:
-    branches: [ master, partract ]
+    branches: [ megaclite ]
 
 env:
   CARGO_TERM_COLOR: always

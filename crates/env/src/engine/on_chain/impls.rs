@@ -36,8 +36,9 @@ use crate::{
         Topics,
         TopicsBuilderBackend,
     },
-    zk_snarks::{
+    zk::{
         AltBn128,
+        Bls12381,
         CurvePoint,
         CurvePointOutput,
     },
@@ -100,28 +101,56 @@ impl CryptoHash for Keccak256 {
 }
 
 impl CurvePoint for AltBn128 {
-    fn inflect_add(g1: &[u8], g2: &[u8], output: &mut <Self as CurvePointOutput>::Type) {
+    fn inflect_add(input: &[u8], output: &mut <Self as CurvePointOutput>::Type) {
         type OutputType = [u8; 64];
         static_assertions::assert_type_eq_all!(
             <AltBn128 as CurvePointOutput>::Type,
             OutputType,
         );
         let output: &mut OutputType = arrayref::array_mut_ref!(output, 0, 64);
-        ext::curve_bn_256_add(g1, g2, output)
+        ext::curve_altbn_128_add(input, output)
     }
 
-    fn inflect_mul(
-        input: &[u8],
-        scalar: u64,
-        output: &mut <Self as CurvePointOutput>::Type,
-    ) {
+    fn inflect_mul(input: &[u8], output: &mut <Self as CurvePointOutput>::Type) {
         type OutputType = [u8; 64];
         static_assertions::assert_type_eq_all!(
             <AltBn128 as CurvePointOutput>::Type,
             OutputType,
         );
         let output: &mut OutputType = arrayref::array_mut_ref!(output, 0, 64);
-        ext::curve_bn_256_mul(input, scalar, output)
+        ext::curve_altbn_128_mul(input, output)
+    }
+
+    fn inflect_pairing(input: &[u8], output: &mut [u8; 1]) {
+        let output: &mut [u8; 1] = arrayref::array_mut_ref!(output, 0, 1);
+        ext::curve_altbn_128_pairing(input, output)
+    }
+}
+
+impl CurvePoint for Bls12381 {
+    fn inflect_add(input: &[u8], output: &mut <Self as CurvePointOutput>::Type) {
+        type OutputType = [u8; 96];
+        static_assertions::assert_type_eq_all!(
+            <Bls12381 as CurvePointOutput>::Type,
+            OutputType,
+        );
+        let output: &mut OutputType = arrayref::array_mut_ref!(output, 0, 96);
+        ext::curve_bls12_381_add(input, output)
+    }
+
+    fn inflect_mul(input: &[u8], output: &mut <Self as CurvePointOutput>::Type) {
+        type OutputType = [u8; 96];
+        static_assertions::assert_type_eq_all!(
+            <Bls12381 as CurvePointOutput>::Type,
+            OutputType,
+        );
+        let output: &mut OutputType = arrayref::array_mut_ref!(output, 0, 96);
+        ext::curve_bls12_381_mul(input, output)
+    }
+
+    fn inflect_pairing(input: &[u8], output: &mut [u8; 1]) {
+        let output: &mut [u8; 1] = arrayref::array_mut_ref!(output, 0, 1);
+        ext::curve_bls12_381_pairing(input, output)
     }
 }
 
@@ -293,28 +322,6 @@ impl EnvBackend for EnvInstance {
         <H as CryptoHash>::hash(input, output)
     }
 
-    fn inflect_add<C>(
-        &mut self,
-        g1: &[u8],
-        g2: &[u8],
-        output: &mut <C as CurvePointOutput>::Type,
-    ) where
-        C: CurvePoint,
-    {
-        <C as CurvePoint>::inflect_add(g1, g2, output)
-    }
-
-    fn inflect_mul<C>(
-        &mut self,
-        input: &[u8],
-        scalar: u64,
-        output: &mut <C as CurvePointOutput>::Type,
-    ) where
-        C: CurvePoint,
-    {
-        <C as CurvePoint>::inflect_mul(input, scalar, output)
-    }
-
     fn hash_encoded<H, T>(&mut self, input: &T, output: &mut <H as HashOutput>::Type)
     where
         H: CryptoHash,
@@ -323,6 +330,27 @@ impl EnvBackend for EnvInstance {
         let mut scope = self.scoped_buffer();
         let enc_input = scope.take_encoded(input);
         <H as CryptoHash>::hash(enc_input, output)
+    }
+
+    fn inflect_add<C>(&mut self, input: &[u8], output: &mut <C as CurvePointOutput>::Type)
+    where
+        C: CurvePoint,
+    {
+        <C as CurvePoint>::inflect_add(input, output)
+    }
+
+    fn inflect_mul<C>(&mut self, input: &[u8], output: &mut <C as CurvePointOutput>::Type)
+    where
+        C: CurvePoint,
+    {
+        <C as CurvePoint>::inflect_mul(input, output)
+    }
+
+    fn inflect_pairing<C>(&mut self, input: &[u8], output: &mut [u8; 1])
+    where
+        C: CurvePoint,
+    {
+        <C as CurvePoint>::inflect_pairing(input, output)
     }
 
     #[cfg(feature = "ink-unstable-chain-extensions")]

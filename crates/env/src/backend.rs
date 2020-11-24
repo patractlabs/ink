@@ -23,7 +23,7 @@ use crate::{
         HashOutput,
     },
     topics::Topics,
-    zk_snarks::{
+    zk::{
         CurvePoint,
         CurvePointOutput,
     },
@@ -126,29 +126,32 @@ pub trait EnvBackend {
     where
         H: CryptoHash;
 
-    /// Conducts the crypto hash of the given input and stores the result in `output`.
-    fn inflect_add<C>(
-        &mut self,
-        g1: &[u8],
-        g2: &[u8],
-        output: &mut <C as CurvePointOutput>::Type,
-    ) where
-        C: CurvePoint;
-
-    /// Conducts the crypto hash of the given input and stores the result in `output`.
-    fn inflect_mul<C>(
-        &mut self,
-        input: &[u8],
-        scalar: u64,
-        output: &mut <C as CurvePointOutput>::Type,
-    ) where
-        C: CurvePoint;
-
     /// Conducts the crypto hash of the given encoded input and stores the result in `output`.
     fn hash_encoded<H, T>(&mut self, input: &T, output: &mut <H as HashOutput>::Type)
     where
         H: CryptoHash,
         T: scale::Encode;
+
+    /// Conducts the crypto curve add of the given input and stores the result in `output`.
+    fn inflect_add<C>(
+        &mut self,
+        input: &[u8],
+        output: &mut <C as CurvePointOutput>::Type,
+    ) where
+        C: CurvePoint;
+
+    /// Conducts the crypto curve mul of the given input and stores the result in `output`.
+    fn inflect_mul<C>(
+        &mut self,
+        input: &[u8],
+        output: &mut <C as CurvePointOutput>::Type,
+    ) where
+        C: CurvePoint;
+
+    /// Conducts the crypto curve mul of the given input and stores the result in `output`.
+    fn inflect_pairing<C>(&mut self, input: &[u8], output: &mut [u8; 1])
+    where
+        C: CurvePoint;
 
     /// Calls the chain extension with the given ID and inputs.
     ///

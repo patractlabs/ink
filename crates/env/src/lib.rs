@@ -69,7 +69,7 @@ pub mod hash;
 #[doc(hidden)]
 pub mod topics;
 mod types;
-pub mod zk_snarks;
+pub mod zk;
 
 #[cfg(test)]
 mod tests;
