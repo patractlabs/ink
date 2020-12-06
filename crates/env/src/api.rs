@@ -533,6 +533,13 @@ pub fn debug_println(content: &str) {
     })
 }
 
+/// Output pretty log with the given contents.
+pub fn pretty_log(level: u32, target: &str, content: &str) {
+    <EnvInstance as OnInstance>::on_instance(|instance| {
+        EnvBackend::log(instance, level, target, content)
+    })
+}
+
 /// Conducts the crypto hash of the given input and stores the result in `output`.
 pub fn hash_bytes<H>(input: &[u8], output: &mut <H as HashOutput>::Type)
 where

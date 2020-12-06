@@ -315,6 +315,10 @@ impl EnvBackend for EnvInstance {
         ext::println(content)
     }
 
+    fn log(&mut self, level: u32, target: &str, content: &str) {
+        ext::log(level, target, content)
+    }
+
     fn hash_bytes<H>(&mut self, input: &[u8], output: &mut <H as HashOutput>::Type)
     where
         H: CryptoHash,

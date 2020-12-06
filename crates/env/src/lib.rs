@@ -70,6 +70,8 @@ pub mod hash;
 pub mod topics;
 mod types;
 pub mod zk;
+#[macro_use]
+pub mod log;
 
 #[cfg(test)]
 mod tests;
@@ -97,4 +99,5 @@ pub use self::{
         Environment,
         Hash,
     },
+    log::*,
 };

@@ -27,6 +27,11 @@ cfg-if = "1.0"
 paste = "1.0"
 arrayref = "0.3"
 static_assertions = "1.1"
+log = { version = "0.4" }
+
+# Log print for the off-chain environment.
+chrono = { version = "0.4", optional = true }
+colored = { version = "^1.6", optional = true }
 
 # Hashes for the off-chain environment.
 sha2 = { version = "0.9", optional = true }
@@ -59,5 +64,8 @@ std = [
     "sha2",
     "sha3",
     "blake2",
+    # Enables log color crates for off-chain environment.
+    "chrono",
+    "colored",
 ]
 ink-unstable-chain-extensions = []

@@ -121,6 +121,9 @@ pub trait EnvBackend {
     /// Prints the given contents to the console log.
     fn println(&mut self, content: &str);
 
+    /// Logs the the given contents at the specified level and target.
+    fn log(&mut self, level: u32, target: &str, content: &str);
+
     /// Conducts the crypto hash of the given input and stores the result in `output`.
     fn hash_bytes<H>(&mut self, input: &[u8], output: &mut <H as HashOutput>::Type)
     where

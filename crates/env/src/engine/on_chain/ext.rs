@@ -308,6 +308,14 @@ mod sys {
         );
         pub fn seal_println(str_ptr: Ptr32<[u8]>, str_len: u32);
 
+        pub fn seal_log(
+            level: u32,
+            target_ptr: Ptr32<[u8]>,
+            target_len: u32,
+            str_ptr: Ptr32<[u8]>,
+            str_len: u32,
+        );
+
         pub fn seal_hash_keccak_256(
             input_ptr: Ptr32<[u8]>,
             input_len: u32,
@@ -627,6 +635,19 @@ pub fn random(subject: &[u8], output: &mut &mut [u8]) {
 pub fn println(content: &str) {
     let bytes = content.as_bytes();
     unsafe { sys::seal_println(Ptr32::from_slice(bytes), bytes.len() as u32) }
+}
+
+pub fn log(level: u32, target: &str, content: &str) {
+    let (target_bytes, content_bytes) = (target.as_bytes(), content.as_bytes());
+    unsafe {
+        sys::seal_log(
+            level,
+            Ptr32::from_slice(target_bytes),
+            target_bytes.len() as u32,
+            Ptr32::from_slice(content_bytes),
+            content_bytes.len() as u32,
+        )
+    }
 }
 
 macro_rules! impl_hash_fn {

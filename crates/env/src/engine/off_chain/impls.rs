@@ -45,6 +45,7 @@ use crate::{
     ReturnFlags,
     TypedEnvBackend,
 };
+use colored::Colorize;
 use core::convert::TryInto;
 use ink_primitives::Key;
 use num_traits::Bounded;
@@ -206,6 +207,27 @@ impl EnvBackend for EnvInstance {
 
     fn println(&mut self, content: &str) {
         self.console.println(content)
+    }
+
+    fn log(&mut self, level: u32, target: &str, content: &str) {
+        let (log_level, log_emoji) = match level {
+            1 => (log::Level::Error.to_string().red(), "❌️"),
+            2 => (log::Level::Warn.to_string().yellow(), "⚠️"),
+            3 => (log::Level::Info.to_string().cyan(), "❤️"),
+            4 => (log::Level::Debug.to_string().purple(), "📋"),
+            5 => (log::Level::Trace.to_string().normal(), "🏷"),
+            _ => (log::Level::Warn.to_string().yellow(), "⚠️ unknown log_level"),
+        };
+
+        let message = format!(
+            "{} {:<5} [{}] {} {}",
+            chrono::Local::now().format("%Y-%m-%d %H:%M:%S.%3f"),
+            log_level,
+            target,
+            log_emoji,
+            content
+        );
+        self.console.println(&message)
     }
 
     fn hash_bytes<H>(&mut self, input: &[u8], output: &mut <H as HashOutput>::Type)
