@@ -91,6 +91,7 @@ pub use self::{
         Error,
         Result,
     },
+    log::*,
     topics::Topics,
     types::{
         AccountId,
@@ -99,5 +100,4 @@ pub use self::{
         Environment,
         Hash,
     },
-    log::*,
 };

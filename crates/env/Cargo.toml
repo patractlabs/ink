@@ -65,6 +65,7 @@ std = [
     "sha3",
     "blake2",
     # Enables log color crates for off-chain environment.
+    "log/std",
     "chrono",
     "colored",
 ]
