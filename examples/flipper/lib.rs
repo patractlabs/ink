@@ -40,6 +40,7 @@ pub mod flipper {
         #[ink(message)]
         pub fn flip(&mut self) {
             self.value = !self.value;
+            ink_env::info!(target: "flipper-contract", "latest value is: {}", self.value);
         }
 
         /// Returns the current value of the Flipper's bool.
