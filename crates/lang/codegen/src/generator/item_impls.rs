@@ -179,6 +179,7 @@ impl ItemImpls<'_> {
         quote_spanned!(span =>
             #( #attrs )*
             #vis fn #ident( #( #inputs ),* ) -> Self {
+                ::ink_env::InkLogger::new().init();
                 #( #statements )*
             }
         )
@@ -204,6 +205,7 @@ impl ItemImpls<'_> {
         quote_spanned!(span =>
             #( #attrs )*
             #vis fn #ident(#receiver, #( #inputs ),* ) #output_arrow #output {
+                ::ink_env::InkLogger::new().init();
                 #( #statements )*
             }
         )
